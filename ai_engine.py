@@ -44,6 +44,45 @@ class ConversationMemory:
             self.sessions[user_id]["last_active"] = time.time()
 
 
+def sanitize_gemini_turns(history: List[dict], current_prompt: str) -> List[dict]:
+    """
+    Sanitizes conversation history for Google Gemini:
+    1. Ensures contents strictly start with 'user'.
+    2. Ensures alternating sequence ('user', 'model', 'user', ...).
+    3. Merges consecutive same-role parts to prevent Gemini 400 Bad Request.
+    """
+    contents = []
+    
+    # Process history turns
+    for item in history:
+        role = "user" if item.get("role") in ("user", "human") else "model"
+        text = (item.get("text") or "").strip()
+        if not text:
+            continue
+            
+        if not contents:
+            if role != "user":
+                # First message must be user in Gemini
+                continue
+            contents.append({"role": "user", "parts": [text]})
+        else:
+            prev = contents[-1]
+            if prev["role"] == role:
+                # Same role consecutive - merge into parts
+                prev["parts"].append(text)
+            else:
+                contents.append({"role": role, "parts": [text]})
+
+    # Add the current user prompt
+    if not contents or contents[-1]["role"] != "user":
+        contents.append({"role": "user", "parts": [current_prompt]})
+    else:
+        # Merge if previous was somehow user
+        contents[-1]["parts"].append(current_prompt)
+
+    return contents
+
+
 class AIEngine:
     def __init__(
         self,
@@ -72,7 +111,7 @@ class AIEngine:
                     genai.configure(api_key=key)
                     self.gemini_client = genai.GenerativeModel(
                         model_name=self.gemini_model_name,
-                        system_instruction=self.system_instruction
+                        system_instruction=self.system_instruction or None
                     )
                     logger.info(f"Gemini client initialized with model: {self.gemini_model_name}")
                 except Exception as e:
@@ -94,47 +133,49 @@ class AIEngine:
 
     async def generate_reply(self, user_id: int, message_text: str, sender_name: str = "User") -> str:
         """Generates an AI reply to a private message with conversation history."""
-        # Check if text is empty
         if not message_text or not message_text.strip():
             return ""
 
-        # Format input with sender's name for extra context
-        formatted_prompt = f"[{sender_name}]: {message_text}"
+        formatted_prompt = f"[{sender_name}]: {message_text.strip()}"
 
         try:
             if self.provider == "gemini" and self.gemini_client:
-                return await self._reply_gemini(user_id, formatted_prompt, message_text)
+                return await self._reply_gemini(user_id, formatted_prompt, message_text.strip())
             elif self.provider == "openai" and self.openai_client:
-                return await self._reply_openai(user_id, formatted_prompt, message_text)
+                return await self._reply_openai(user_id, formatted_prompt, message_text.strip())
             else:
-                # Fallback template if no API key is configured yet
+                # Built-in contextual fallback response
                 return (
-                    f"Hi {sender_name}! I received your private message: \"{message_text}\". "
-                    "I am an automated AI assistant. Please configure my GEMINI_API_KEY or OPENAI_API_KEY to enable smart replies!"
+                    f"Hi {sender_name}! I received your private message: \"{message_text.strip()}\". "
+                    "I am currently in auto-reply mode. Please set GEMINI_API_KEY or OPENAI_API_KEY to activate dynamic AI reasoning."
                 )
         except Exception as e:
             logger.error(f"Error in generate_reply: {e}", exc_info=True)
-            return "Thank you for reaching out! I received your message and will review it as soon as possible."
+            return "Thank you for reaching out! I received your message and will follow up shortly."
 
     async def _reply_gemini(self, user_id: int, formatted_prompt: str, raw_text: str) -> str:
         import asyncio
         history = self.memory.get_history(user_id)
-        
-        # Build contents list for Gemini
-        gemini_contents = []
-        for item in history:
-            role = "user" if item["role"] == "user" else "model"
-            gemini_contents.append({"role": role, "parts": [item["text"]]})
-        
-        gemini_contents.append({"role": "user", "parts": [formatted_prompt]})
+        gemini_contents = sanitize_gemini_turns(history, formatted_prompt)
 
-        # Run async in executor since google-generativeai SDK sync call
         loop = asyncio.get_running_loop()
         response = await loop.run_in_executor(
             None,
             lambda: self.gemini_client.generate_content(gemini_contents)
         )
-        reply_text = response.text.strip() if response and response.text else "Message received."
+
+        reply_text = ""
+        try:
+            if response and response.text:
+                reply_text = response.text.strip()
+        except (ValueError, AttributeError):
+            if response and response.candidates:
+                candidate = response.candidates[0]
+                if candidate.content and candidate.content.parts:
+                    reply_text = candidate.content.parts[0].text.strip()
+
+        if not reply_text:
+            reply_text = "I received your message and will get back to you shortly."
 
         # Update memory
         self.memory.add_message(user_id, "user", raw_text)
@@ -143,7 +184,9 @@ class AIEngine:
 
     async def _reply_openai(self, user_id: int, formatted_prompt: str, raw_text: str) -> str:
         history = self.memory.get_history(user_id)
-        messages = [{"role": "system", "content": self.system_instruction}]
+        messages = []
+        if self.system_instruction:
+            messages.append({"role": "system", "content": self.system_instruction})
         
         for item in history:
             role = "user" if item["role"] == "user" else "assistant"

@@ -7,18 +7,10 @@ Built using python-telegram-bot (v20+ async).
 import sys
 import asyncio
 import logging
-from telegram import Update
-from telegram.constants import ChatAction
-from telegram.ext import (
-    Application,
-    CommandHandler,
-    MessageHandler,
-    ContextTypes,
-    filters
-)
 
 from config import Config
 from ai_engine import AIEngine
+from filters import RateLimiter, MessageFilter
 
 logging.basicConfig(
     format="%(asctime)s - [%(name)s] - %(levelname)s - %(message)s",
@@ -26,6 +18,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger("TelegramBot")
 
+# Initialize Rate Limiter & AI Engine
+rate_limiter = RateLimiter(
+    cooldown_seconds=Config.REPLY_COOLDOWN_SECONDS,
+    max_replies_per_hour=Config.MAX_REPLIES_PER_HOUR
+)
 ai = AIEngine(
     provider=Config.AI_PROVIDER,
     gemini_api_key=Config.GEMINI_API_KEY,
@@ -35,7 +32,7 @@ ai = AIEngine(
     system_instruction=Config.SYSTEM_PROMPT
 )
 
-async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def start_command(update, context):
     """Handles the /start command."""
     user = update.effective_user
     welcome_text = (
@@ -47,54 +44,79 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(welcome_text)
 
-async def clear_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def clear_command(update, context):
     """Clears conversation context memory for this user."""
     user_id = update.effective_user.id
     ai.memory.clear(user_id)
-    await update.message.reply_text("🧹 Conversation memory cleared! Let's start fresh.")
+    rate_limiter.reset_user(user_id)
+    await update.message.reply_text("🧹 Conversation memory and rate limits cleared! Let's start fresh.")
 
-async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def status_command(update, context):
     """Reports status of the bot."""
     status_text = (
         f"🤖 **Bot Status: Online**\n\n"
-        f"🧠 **AI Engine:** `{Config.AI_PROVIDER.upper()}`\n"
-        f"⚡ **Model:** `{Config.GEMINI_MODEL if Config.AI_PROVIDER == 'gemini' else Config.OPENAI_MODEL}`\n"
-        f"⏱️ **Typing Delay:** `{Config.AUTO_REPLY_DELAY}s`\n"
-        f"🛡️ **Mode:** `Private 1-on-1 Message Auto-Reply`"
+        f"• **AI Engine:** `{Config.AI_PROVIDER.upper()}`\n"
+        f"• **Model:** `{Config.GEMINI_MODEL if Config.AI_PROVIDER == 'gemini' else Config.OPENAI_MODEL}`\n"
+        f"• **Typing Delay:** `{Config.AUTO_REPLY_DELAY}s`\n"
+        f"• **Cooldown:** `{Config.REPLY_COOLDOWN_SECONDS}s`\n"
+        f"• **Hourly Limit:** `{Config.MAX_REPLIES_PER_HOUR}/hr`\n"
+        f"• **Mode:** `Private 1-on-1 Message Auto-Reply`"
     )
     await update.message.reply_markdown(status_text)
 
-async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle_private_message(update, context):
     """Processes incoming 1-on-1 private messages and generates an AI response."""
-    # 1. Enforce private chats only
-    if update.effective_chat.type != "private":
-        return
-
     user = update.effective_user
-    user_id = user.id
-    username = (user.username or "").lower()
-    first_name = user.first_name or "Friend"
-    message_text = update.message.text
+    chat = update.effective_chat
 
-    if not message_text or not message_text.strip():
+    if not user or not chat:
         return
 
-    # 2. Check blacklist
+    is_private = chat.type == "private"
+    is_bot = getattr(user, "is_bot", False)
+    user_id = user.id
+    username = user.username
+    first_name = user.first_name or "Friend"
+    message_text = (update.message.text or "").strip()
+
+    if not message_text:
+        return
+
+    # Filter checks (whitelist, blacklist, bot check, private check)
+    whitelist = Config.get_whitelist()
     blacklist = Config.get_blacklist()
-    if username in blacklist or str(user_id) in blacklist:
-        logger.info(f"Ignored blacklisted user: {username} (ID: {user_id})")
+
+    should_reply, reason = MessageFilter.should_reply(
+        is_private=is_private,
+        is_self=False,
+        is_bot=is_bot,
+        sender_id=user_id,
+        username=username,
+        whitelist=whitelist,
+        blacklist=blacklist
+    )
+
+    if not should_reply:
+        logger.info(f"Skipping message from {first_name} (ID: {user_id}): {reason}")
+        return
+
+    # Rate limiting check
+    is_limited, limit_reason = rate_limiter.is_rate_limited(user_id)
+    if is_limited:
+        logger.info(f"Rate limited user {first_name} (ID: {user_id}): {limit_reason}")
         return
 
     logger.info(f"[Private Message] From {first_name} (@{username or user_id}): \"{message_text}\"")
 
     try:
-        # 3. Send typing indicator
-        await context.bot.send_chat_action(chat_id=update.effective_chat.id, action=ChatAction.TYPING)
+        from telegram.constants import ChatAction
+        # Typing indicator
+        await context.bot.send_chat_action(chat_id=chat.id, action=ChatAction.TYPING)
         
         if Config.AUTO_REPLY_DELAY > 0:
             await asyncio.sleep(Config.AUTO_REPLY_DELAY)
 
-        # 4. Generate AI response
+        # Generate AI response
         reply_text = await ai.generate_reply(
             user_id=user_id,
             message_text=message_text,
@@ -103,6 +125,7 @@ async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_T
 
         if reply_text:
             await update.message.reply_text(reply_text)
+            rate_limiter.record_reply(user_id)
             logger.info(f"[Replied to {first_name}]: \"{reply_text[:80]}...\"")
 
     except Exception as e:
@@ -110,6 +133,22 @@ async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_T
         await update.message.reply_text("I apologize, but I encountered an error processing your message.")
 
 def main():
+    try:
+        from telegram import Update
+        from telegram.ext import (
+            Application,
+            CommandHandler,
+            MessageHandler,
+            ContextTypes,
+            filters
+        )
+    except ImportError:
+        logger.error("=" * 60)
+        logger.error("MISSING DEPENDENCY: python-telegram-bot is not installed!")
+        logger.error("Please install: pip install -r requirements.txt")
+        logger.error("=" * 60)
+        sys.exit(1)
+
     if not Config.TELEGRAM_BOT_TOKEN:
         logger.error("=" * 60)
         logger.error("MISSING TELEGRAM_BOT_TOKEN!")

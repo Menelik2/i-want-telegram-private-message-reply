@@ -9,12 +9,10 @@ import sys
 import time
 import asyncio
 import logging
-from collections import defaultdict
-from telethon import TelegramClient, events
-from telethon.tl.types import User
 
 from config import Config
 from ai_engine import AIEngine
+from filters import RateLimiter, MessageFilter, AwayManager
 
 # Configure logging
 logging.basicConfig(
@@ -23,12 +21,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger("Userbot")
 
-# Track per-user reply activity for rate-limiting
-# user_id -> [timestamps of replies in the last hour]
-reply_history = defaultdict(list)
-last_reply_time = {}
-
-# Initialize AI Engine
+# Initialize managers
+rate_limiter = RateLimiter(
+    cooldown_seconds=Config.REPLY_COOLDOWN_SECONDS,
+    max_replies_per_hour=Config.MAX_REPLIES_PER_HOUR
+)
+away_manager = AwayManager(
+    initially_away=Config.AWAY_MODE_ONLY,
+    default_reason="Currently away from Telegram"
+)
 ai = AIEngine(
     provider=Config.AI_PROVIDER,
     gemini_api_key=Config.GEMINI_API_KEY,
@@ -38,34 +39,18 @@ ai = AIEngine(
     system_instruction=Config.SYSTEM_PROMPT
 )
 
-def is_rate_limited(user_id: int) -> bool:
-    """Checks if a user has exceeded rate limits or is on cooldown."""
-    now = time.time()
-    
-    # 1. Check minimum cooldown between replies
-    if user_id in last_reply_time:
-        if now - last_reply_time[user_id] < Config.REPLY_COOLDOWN_SECONDS:
-            logger.info(f"Rate limiter: User {user_id} is in cooldown period ({Config.REPLY_COOLDOWN_SECONDS}s).")
-            return True
-
-    # 2. Check maximum replies per hour
-    one_hour_ago = now - 3600
-    # Clean up old timestamps
-    reply_history[user_id] = [t for t in reply_history[user_id] if t > one_hour_ago]
-
-    if len(reply_history[user_id]) >= Config.MAX_REPLIES_PER_HOUR:
-        logger.warning(f"Rate limiter: User {user_id} reached max replies per hour ({Config.MAX_REPLIES_PER_HOUR}).")
-        return True
-
-    return False
-
-def record_reply(user_id: int):
-    """Records that a reply was just sent to the user."""
-    now = time.time()
-    last_reply_time[user_id] = now
-    reply_history[user_id].append(now)
-
 async def main():
+    try:
+        from telethon import TelegramClient, events
+        from telethon.tl.types import User
+        from telethon.errors import FloodWaitError
+    except ImportError:
+        logger.error("=" * 60)
+        logger.error("MISSING DEPENDENCY: Telethon is not installed!")
+        logger.error("Please install dependencies: pip install -r requirements.txt")
+        logger.error("=" * 60)
+        sys.exit(1)
+
     if not Config.TELEGRAM_API_ID or not Config.TELEGRAM_API_HASH:
         logger.error("=" * 60)
         logger.error("MISSING CREDENTIALS!")
@@ -81,75 +66,114 @@ async def main():
         Config.TELEGRAM_API_HASH
     )
 
-    # Start the client (prompts for phone & code on first run if session file doesn't exist)
+    # Start client
     await client.start(phone=Config.TELEGRAM_PHONE if Config.TELEGRAM_PHONE else None)
-    
     me = await client.get_me()
+
     logger.info("=" * 60)
-    logger.info(f"Telegram AI Private Message Userbot Connected!")
+    logger.info("Telegram AI Private Message Userbot Connected!")
     logger.info(f"Logged in as: {me.first_name} (@{me.username or 'No Username'}, ID: {me.id})")
     logger.info(f"AI Provider: {Config.AI_PROVIDER.upper()}")
-    logger.info(f"Auto-reply delay: {Config.AUTO_REPLY_DELAY}s | Cooldown: {Config.REPLY_COOLDOWN_SECONDS}s")
-    logger.info(f"Max replies per user/hr: {Config.MAX_REPLIES_PER_HOUR}")
+    logger.info(f"Typing Delay: {Config.AUTO_REPLY_DELAY}s | Cooldown: {Config.REPLY_COOLDOWN_SECONDS}s")
+    logger.info(f"Max Replies/Hour: {Config.MAX_REPLIES_PER_HOUR} | Away Only: {Config.AWAY_MODE_ONLY}")
+    logger.info("Commands available in your Telegram: .status, .away, .back, .help")
     logger.info("Listening exclusively for incoming PRIVATE messages (DMs)...")
     logger.info("=" * 60)
 
-    whitelist = Config.get_whitelist()
-    blacklist = Config.get_blacklist()
+    # -------------------------------------------------------------
+    # 1. OUTGOING SELF-COMMANDS (.status, .away, .back, .help)
+    # -------------------------------------------------------------
+    @client.on(events.NewMessage(outgoing=True))
+    async def on_self_command(event):
+        text = (event.raw_text or "").strip()
+        if not text.startswith("."):
+            return
 
+        cmd = text.split()[0].lower()
+        args = text[len(cmd):].strip()
+
+        if cmd == ".status":
+            status_report = (
+                f"🤖 **Telegram AI Auto-Reply Status**\n\n"
+                f"• **Status:** `{'AWAY' if away_manager.is_away else 'ONLINE'}`\n"
+                f"• **Reason:** `{away_manager.reason}`\n"
+                f"• **AI Engine:** `{Config.AI_PROVIDER.upper()}`\n"
+                f"• **Typing Delay:** `{Config.AUTO_REPLY_DELAY}s`\n"
+                f"• **Cooldown:** `{Config.REPLY_COOLDOWN_SECONDS}s`\n"
+                f"• **Hourly Limit:** `{Config.MAX_REPLIES_PER_HOUR}/hr`\n"
+                f"• **Scope:** `Private 1-on-1 Messages Only`"
+            )
+            await event.edit(status_report)
+
+        elif cmd == ".away":
+            reason = args if args else "Away from Telegram"
+            away_manager.set_away(reason)
+            await event.edit(f"💤 **Away Mode ACTIVATED**\nReason: _{reason}_\nAuto-reply will now respond to private DMs.")
+
+        elif cmd == ".back":
+            away_manager.set_back()
+            await event.edit("🟢 **Away Mode DEACTIVATED**\nStatus is now ONLINE.")
+
+        elif cmd == ".help":
+            help_text = (
+                "🛠️ **AI Userbot Commands (Send in any chat or Saved Messages):**\n\n"
+                "• `.status` - Check current bot status and limits\n"
+                "• `.away [reason]` - Enable away auto-reply mode\n"
+                "• `.back` - Disable away mode (set status to online)\n"
+                "• `.help` - Show this commands manual"
+            )
+            await event.edit(help_text)
+
+    # -------------------------------------------------------------
+    # 2. INCOMING PRIVATE MESSAGES AUTO-REPLY
+    # -------------------------------------------------------------
     @client.on(events.NewMessage(incoming=True))
     async def on_private_message(event):
         try:
-            # 1. Strictly ignore anything that is NOT a 1-on-1 private message
-            if not event.is_private:
-                return
-
-            # 2. Never reply to your own messages
-            if event.out:
-                return
-
-            # 3. Get sender details
+            # 1. Validate sender and message type using MessageFilter
             sender = await event.get_sender()
-            if not isinstance(sender, User):
+            is_bot = getattr(sender, "bot", False) if sender else False
+            sender_id = sender.id if sender else 0
+            username = getattr(sender, "username", None) if sender else None
+            first_name = getattr(sender, "first_name", "Friend") or "Friend"
+
+            whitelist = Config.get_whitelist()
+            blacklist = Config.get_blacklist()
+
+            should_reply, reason = MessageFilter.should_reply(
+                is_private=event.is_private,
+                is_self=event.out,
+                is_bot=is_bot,
+                sender_id=sender_id,
+                username=username,
+                whitelist=whitelist,
+                blacklist=blacklist,
+                away_manager=away_manager,
+                away_mode_only=Config.AWAY_MODE_ONLY
+            )
+
+            if not should_reply:
+                # Silently skip non-qualifying messages
                 return
 
-            # 4. Never reply to bots (prevents loop accidents)
-            if sender.bot:
-                logger.info(f"Ignoring message from bot: @{sender.username or sender.id}")
+            message_text = (event.raw_text or "").strip()
+            if not message_text:
                 return
 
-            sender_id = sender.id
-            username = (sender.username or "").lower()
-            first_name = sender.first_name or "Friend"
-
-            # 5. Blacklist filter
-            if username in blacklist or str(sender_id) in blacklist:
-                logger.info(f"Ignored blacklisted user: {username} (ID: {sender_id})")
-                return
-
-            # 6. Whitelist filter (if whitelist is configured, only reply to whitelisted users)
-            if whitelist and (username not in whitelist and str(sender_id) not in whitelist):
-                logger.info(f"User {username} (ID: {sender_id}) not in whitelist. Skipping.")
-                return
-
-            # 7. Check message text content
-            message_text = event.raw_text
-            if not message_text or not message_text.strip():
-                # Ignore empty messages, stickers without text, or pure media
-                return
-
-            # 8. Check rate limiting & cooldown
-            if is_rate_limited(sender_id):
+            # 2. Rate Limit & Cooldown Check
+            is_limited, limit_reason = rate_limiter.is_rate_limited(sender_id)
+            if is_limited:
+                logger.info(f"Rate limited user {first_name} (ID: {sender_id}): {limit_reason}")
                 return
 
             logger.info(f"[Private DM] From {first_name} (@{username or sender_id}): \"{message_text}\"")
 
-            # 9. Simulate human typing action
+            # 3. Simulate human typing action
             async with client.action(event.chat_id, 'typing'):
                 if Config.AUTO_REPLY_DELAY > 0:
                     await asyncio.sleep(Config.AUTO_REPLY_DELAY)
 
-                # 10. Generate AI Reply
+                # 4. Generate AI response
                 reply_text = await ai.generate_reply(
                     user_id=sender_id,
                     message_text=message_text,
@@ -159,15 +183,18 @@ async def main():
             if not reply_text:
                 return
 
-            # 11. Send reply to the private message
+            # 5. Send reply
             await event.reply(reply_text)
-            record_reply(sender_id)
+            rate_limiter.record_reply(sender_id)
             logger.info(f"[Auto-Replied to {first_name}]: \"{reply_text[:80]}...\"")
 
+        except FloodWaitError as e:
+            logger.warning(f"Telegram FloodWaitError: sleeping for {e.seconds} seconds")
+            await asyncio.sleep(e.seconds)
         except Exception as e:
             logger.error(f"Error handling message: {e}", exc_info=True)
 
-    # Run the userbot indefinitely until disconnected
+    # Keep userbot running
     await client.run_until_disconnected()
 
 if __name__ == "__main__":

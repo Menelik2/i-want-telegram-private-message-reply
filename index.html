@@ -1,1 +1,1205 @@
-<h1>Hello Antigravity</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Telegram Private Message AI Auto-Reply Bot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            telegram: {
+              DEFAULT: '#24A1DE',
+              light: '#54b9eb',
+              dark: '#1c82b3',
+              bubbleUser: '#2b5278',
+              bubbleBot: '#182533',
+              chatBg: '#0e1621'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+    ::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(71, 85, 105, 1); }
+
+    /* Typing animation */
+    @keyframes bounceDot {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1.1); opacity: 1; }
+    }
+    .typing-dot {
+      animation: bounceDot 1.4s infinite ease-in-out both;
+    }
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col selection:bg-cyan-500 selection:text-white antialiased">
+
+  <!-- TOP APP BAR -->
+  <header class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Logo & Title -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/20">
+          <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.77-1.16 3.35-1.36 3.73-1.37.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-base font-bold text-white tracking-tight">Telegram AI Private Reply</h1>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+              Ready
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">Personal DM Auto-Responder & BotFather Engine</p>
+        </div>
+      </div>
+
+      <!-- Quick Nav Buttons -->
+      <div class="flex items-center space-x-2">
+        <a href="https://github.com/Menelik2/i-want-telegram-private-message-reply" target="_blank" rel="noopener noreferrer" 
+           class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 transition">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          <span class="hidden sm:inline">GitHub</span>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- SUB NAVIGATION TABS -->
+    <div class="border-t border-slate-800/80 bg-slate-900/50">
+      <div class="max-w-7xl mx-auto px-4 flex space-x-1 overflow-x-auto py-2 no-scrollbar">
+        <button onclick="switchTab('simulator')" id="tab-btn-simulator" class="tab-btn active px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition bg-sky-500 text-white shadow-sm">
+          <span>💬</span>
+          <span>Live DM Simulator</span>
+        </button>
+        <button onclick="switchTab('persona')" id="tab-btn-persona" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition">
+          <span>🎭</span>
+          <span>Persona & Rules</span>
+        </button>
+        <button onclick="switchTab('wizard')" id="tab-btn-wizard" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition">
+          <span>🔑</span>
+          <span>Credentials Wizard</span>
+        </button>
+        <button onclick="switchTab('code')" id="tab-btn-code" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition">
+          <span>⚙️</span>
+          <span>Config & Code</span>
+        </button>
+        <button onclick="switchTab('deploy')" id="tab-btn-deploy" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition">
+          <span>🚀</span>
+          <span>Deploy 24/7</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+    <!-- ======================================================== -->
+    <!-- TAB 1: LIVE DM SIMULATOR -->
+    <!-- ======================================================== -->
+    <div id="tab-simulator" class="tab-content grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT: TELEGRAM PHONE MOCKUP (Cols 1-7) -->
+      <div class="lg:col-span-7 flex flex-col">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[640px]">
+          
+          <!-- Telegram Chat Header -->
+          <div class="bg-[#17212b] px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="relative">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-sky-400 to-indigo-600 flex items-center justify-center font-bold text-white shadow">
+                  🤖
+                </div>
+                <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-[#17212b] rounded-full"></span>
+              </div>
+              <div>
+                <h3 class="text-sm font-semibold text-white leading-tight flex items-center space-x-1.5">
+                  <span id="chat-header-name">My AI Auto-Responder</span>
+                  <span class="text-[10px] px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-400 font-mono font-normal">DM</span>
+                </h3>
+                <p id="chat-header-status" class="text-xs text-sky-400">online • auto-reply active</p>
+              </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center space-x-2">
+              <button onclick="clearChat()" class="text-xs text-slate-400 hover:text-rose-400 px-2 py-1 rounded hover:bg-slate-800 transition" title="Clear message history">
+                🧹 Clear
+              </button>
+              <div class="h-4 w-px bg-slate-700"></div>
+              <span class="text-[11px] text-slate-400 font-mono bg-slate-800/80 px-2 py-0.5 rounded">
+                1-on-1 Private Chat
+              </span>
+            </div>
+          </div>
+
+          <!-- Telegram Message Feed -->
+          <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-[#0e1621] text-sm">
+            
+            <!-- Date Separator -->
+            <div class="flex justify-center my-2">
+              <span class="bg-[#182533]/80 text-slate-400 text-[11px] px-3 py-0.5 rounded-full shadow-sm">
+                Today
+              </span>
+            </div>
+
+            <!-- Greeting from Bot -->
+            <div class="flex flex-col items-start max-w-[85%]">
+              <div class="bg-[#182533] text-slate-200 px-3.5 py-2.5 rounded-2xl rounded-tl-sm shadow-md border border-slate-800/40">
+                <p class="leading-relaxed">
+                  👋 Hello! I am your AI auto-responder. Whenever someone sends a private message to this Telegram account, I automatically analyze the context and reply in real-time.
+                </p>
+                <div class="flex items-center justify-end space-x-1 mt-1 text-[10px] text-slate-400">
+                  <span>12:00 PM</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hint pill -->
+            <div class="flex justify-center my-1">
+              <span class="bg-sky-950/40 border border-sky-800/30 text-sky-400 text-[11px] px-3 py-1 rounded-full text-center">
+                💡 Try typing a message below or click one of the quick test prompts!
+              </span>
+            </div>
+
+          </div>
+
+          <!-- Typing Indicator (Hidden by default) -->
+          <div id="typing-indicator" class="hidden px-4 py-2 bg-[#0e1621] text-xs text-sky-400 flex items-center space-x-2 border-t border-slate-800/40">
+            <span class="flex space-x-1">
+              <span class="w-1.5 h-1.5 bg-sky-400 rounded-full typing-dot"></span>
+              <span class="w-1.5 h-1.5 bg-sky-400 rounded-full typing-dot"></span>
+              <span class="w-1.5 h-1.5 bg-sky-400 rounded-full typing-dot"></span>
+            </span>
+            <span class="italic font-medium">AI is typing a reply...</span>
+          </div>
+
+          <!-- Quick Test Suggestion Pills -->
+          <div class="bg-[#17212b] px-3 py-2 border-t border-slate-800/60 overflow-x-auto flex space-x-2 no-scrollbar">
+            <button onclick="sendQuickPrompt('Hey, are you available for a quick freelance project this week?')" 
+                    class="whitespace-nowrap px-2.5 py-1 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 transition">
+              💼 Freelance Inquiry
+            </button>
+            <button onclick="sendQuickPrompt('Can we schedule a 15-minute call tomorrow afternoon?')" 
+                    class="whitespace-nowrap px-2.5 py-1 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 transition">
+              📅 Meeting Request
+            </button>
+            <button onclick="sendQuickPrompt('Urgent: The production server is throwing 500 errors!')" 
+                    class="whitespace-nowrap px-2.5 py-1 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 transition">
+              🚨 Urgent Issue
+            </button>
+            <button onclick="sendQuickPrompt('What are your hourly rates and consultation fees?')" 
+                    class="whitespace-nowrap px-2.5 py-1 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 transition">
+              💰 Pricing & Rates
+            </button>
+          </div>
+
+          <!-- Telegram Input Area -->
+          <div class="bg-[#17212b] p-3 border-t border-slate-800 flex items-center space-x-2">
+            <input type="text" id="user-input" 
+                   placeholder="Type a private message as a simulated user..." 
+                   class="flex-1 bg-[#0e1621] text-slate-100 text-sm rounded-xl px-4 py-2.5 border border-slate-700/60 focus:outline-none focus:border-sky-500 placeholder-slate-500 transition"
+                   onkeydown="if(event.key === 'Enter') sendMessage()">
+            <button onclick="sendMessage()" 
+                    id="btn-send"
+                    class="bg-sky-500 hover:bg-sky-400 text-white rounded-xl p-2.5 shadow-md shadow-sky-500/20 transition flex items-center justify-center">
+              <svg class="w-5 h-5 transform rotate-90" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
+              </svg>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- RIGHT: LIVE DIAGNOSTICS & CONTROLS (Cols 8-12) -->
+      <div class="lg:col-span-5 space-y-5">
+        
+        <!-- Live Execution Inspector -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+              <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+              <span>Live Event Pipeline</span>
+            </h3>
+            <span class="text-[11px] font-mono text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/40">
+              Telethon / MTProto
+            </span>
+          </div>
+
+          <div class="mt-4 space-y-3 text-xs">
+            
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950/70 border border-slate-800">
+              <span class="text-slate-400">Target Chat Scope:</span>
+              <span class="font-mono text-emerald-400 font-semibold flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                1-on-1 Private DMs Only
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950/70 border border-slate-800">
+              <span class="text-slate-400">Anti-Loop Check:</span>
+              <span class="font-mono text-emerald-400 font-semibold flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Bots Ignored (event.out=False)
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950/70 border border-slate-800">
+              <span class="text-slate-400">Typing Simulator Delay:</span>
+              <span id="diag-delay" class="font-mono text-amber-300 font-semibold">2.0 seconds</span>
+            </div>
+
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950/70 border border-slate-800">
+              <span class="text-slate-400">Active Persona:</span>
+              <span id="diag-persona" class="font-mono text-sky-400 font-semibold">Executive Assistant</span>
+            </div>
+
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950/70 border border-slate-800">
+              <span class="text-slate-400">Context Memory Stack:</span>
+              <span id="diag-memory-count" class="font-mono text-purple-400 font-semibold">1 message stored</span>
+            </div>
+
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950/70 border border-slate-800">
+              <span class="text-slate-400">Hourly Limit Counter:</span>
+              <span id="diag-rate-limit" class="font-mono text-emerald-400 font-semibold">0 / 8 replies</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Quick Persona Switcher in Simulator -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center space-x-2">
+            <span>⚡ Quick Persona Switcher</span>
+          </h3>
+          <p class="text-xs text-slate-400 mb-3">
+            Change how the AI auto-responds to incoming private messages on the fly:
+          </p>
+
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button onclick="setPersona('executive')" class="persona-btn active p-2.5 rounded-xl border border-sky-500 bg-sky-500/10 text-sky-300 text-left transition">
+              <div class="font-bold flex items-center space-x-1.5">
+                <span>👔</span>
+                <span>Executive</span>
+              </div>
+              <div class="text-[10px] text-slate-400 mt-0.5">Polite, notes message, follows up</div>
+            </button>
+
+            <button onclick="setPersona('freelance')" class="persona-btn p-2.5 rounded-xl border border-slate-800 hover:border-slate-700 bg-slate-950 text-slate-300 text-left transition">
+              <div class="font-bold flex items-center space-x-1.5">
+                <span>💼</span>
+                <span>Freelancer</span>
+              </div>
+              <div class="text-[10px] text-slate-400 mt-0.5">Rates, scope, calendar link</div>
+            </button>
+
+            <button onclick="setPersona('support')" class="persona-btn p-2.5 rounded-xl border border-slate-800 hover:border-slate-700 bg-slate-950 text-slate-300 text-left transition">
+              <div class="font-bold flex items-center space-x-1.5">
+                <span>🛎️</span>
+                <span>Customer Care</span>
+              </div>
+              <div class="text-[10px] text-slate-400 mt-0.5">Solves issues, escalates priority</div>
+            </button>
+
+            <button onclick="setPersona('away')" class="persona-btn p-2.5 rounded-xl border border-slate-800 hover:border-slate-700 bg-slate-950 text-slate-300 text-left transition">
+              <div class="font-bold flex items-center space-x-1.5">
+                <span>🏖️</span>
+                <span>Out of Office</span>
+              </div>
+              <div class="text-[10px] text-slate-400 mt-0.5">Away alert, return date info</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Real Gemini API Key Connection (Optional) -->
+        <div class="bg-gradient-to-br from-slate-900 to-sky-950/40 border border-sky-900/40 rounded-2xl p-5 shadow-xl">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="text-xs font-bold text-sky-300 uppercase tracking-wider flex items-center space-x-1.5">
+              <span>🔑 Optional Live Gemini Key</span>
+            </h4>
+            <span class="text-[10px] text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800/40">Client-Side</span>
+          </div>
+          <p class="text-xs text-slate-400 mb-3">
+            The simulator works automatically with built-in realistic AI responses. You can also paste your Google Gemini API key to test live model outputs:
+          </p>
+          <div class="flex space-x-2">
+            <input type="password" id="sim-gemini-key" placeholder="AIzaSy... (stored only in browser)" 
+                   class="flex-1 bg-slate-950 text-xs px-3 py-2 rounded-lg border border-slate-800 focus:outline-none focus:border-sky-500 font-mono text-slate-200">
+            <button onclick="saveSimApiKey()" class="px-3 py-2 bg-sky-600 hover:bg-sky-500 text-xs font-semibold rounded-lg text-white transition">
+              Apply
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ======================================================== -->
+    <!-- TAB 2: PERSONA & RULES STUDIO -->
+    <!-- ======================================================== -->
+    <div id="tab-persona" class="tab-content hidden space-y-6">
+      
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <h2 class="text-lg font-bold text-white mb-2 flex items-center space-x-2">
+          <span>🎭 AI Persona & Auto-Response Prompt Studio</span>
+        </h2>
+        <p class="text-sm text-slate-400 mb-6">
+          Tailor how your bot represents you when replying to private messages. This prompt will be injected directly into the Gemini or OpenAI context.
+        </p>
+
+        <!-- Prompt editor -->
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+              System Instruction / Persona Prompt
+            </label>
+            <textarea id="setting-system-prompt" rows="6" 
+                      class="w-full bg-slate-950 text-sm font-mono text-slate-200 rounded-xl p-4 border border-slate-800 focus:outline-none focus:border-sky-500 transition leading-relaxed"></textarea>
+          </div>
+
+          <!-- Sliders and Safety Settings -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5 pt-4 border-t border-slate-800">
+            
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Typing Delay (Seconds)</label>
+              <div class="text-xs text-slate-400 mb-3">Simulates human typing indicator before replying</div>
+              <div class="flex items-center space-x-3">
+                <input type="range" id="input-delay" min="0" max="10" step="0.5" value="2" 
+                       class="flex-1 accent-sky-500" oninput="updateDelayVal(this.value)">
+                <span id="label-delay" class="font-mono text-sky-400 font-bold text-sm w-12 text-right">2.0s</span>
+              </div>
+            </div>
+
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Cooldown Between Replies</label>
+              <div class="text-xs text-slate-400 mb-3">Minimum pause before auto-replying again</div>
+              <div class="flex items-center space-x-3">
+                <input type="range" id="input-cooldown" min="5" max="60" step="5" value="10" 
+                       class="flex-1 accent-sky-500" oninput="updateCooldownVal(this.value)">
+                <span id="label-cooldown" class="font-mono text-sky-400 font-bold text-sm w-12 text-right">10s</span>
+              </div>
+            </div>
+
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Max Hourly Replies / User</label>
+              <div class="text-xs text-slate-400 mb-3">Prevents infinite loops or spam floods</div>
+              <div class="flex items-center space-x-3">
+                <input type="range" id="input-max-replies" min="2" max="25" step="1" value="8" 
+                       class="flex-1 accent-sky-500" oninput="updateMaxRepliesVal(this.value)">
+                <span id="label-max-replies" class="font-mono text-sky-400 font-bold text-sm w-12 text-right">8/hr</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Filters -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-4 border-t border-slate-800">
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Blacklisted Usernames or IDs</label>
+              <div class="text-xs text-slate-400 mb-2">Comma-separated list of usernames to silently ignore</div>
+              <input type="text" id="setting-blacklist" placeholder="spammer1, crypto_promo, 987654321" 
+                     class="w-full bg-slate-900 text-xs px-3 py-2 rounded-lg border border-slate-800 focus:outline-none focus:border-sky-500 text-slate-200 font-mono">
+            </div>
+
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Whitelist (Optional)</label>
+              <div class="text-xs text-slate-400 mb-2">If set, bot will ONLY reply to these specific users</div>
+              <input type="text" id="setting-whitelist" placeholder="leave empty to reply to all private DMs" 
+                     class="w-full bg-slate-900 text-xs px-3 py-2 rounded-lg border border-slate-800 focus:outline-none focus:border-sky-500 text-slate-200 font-mono">
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-3">
+            <button onclick="savePersonaSettings()" class="px-5 py-2.5 bg-sky-500 hover:bg-sky-400 font-semibold text-xs rounded-xl text-white shadow-lg shadow-sky-500/20 transition flex items-center space-x-2">
+              <span>Save & Apply Settings</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ======================================================== -->
+    <!-- TAB 3: CREDENTIALS WIZARD -->
+    <!-- ======================================================== -->
+    <div id="tab-wizard" class="tab-content hidden space-y-6">
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Card A: Personal Account Auto-Reply (Userbot) -->
+        <div class="bg-slate-900 border border-sky-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
+          <div class="absolute -right-10 -top-10 w-32 h-32 bg-sky-500/10 rounded-full blur-2xl"></div>
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-bold uppercase tracking-wider text-sky-400 bg-sky-950 px-2.5 py-1 rounded-md border border-sky-800">
+                Mode A • Recommended
+              </span>
+              <span class="text-2xl">👤</span>
+            </div>
+            
+            <h3 class="text-base font-bold text-white mb-2">Personal Account Auto-Reply (Userbot)</h3>
+            <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+              Responds to incoming private messages sent directly to <b>your personal Telegram account</b> (e.g. from friends, clients, leads) while you are away or busy.
+            </p>
+
+            <div class="space-y-3 text-xs bg-slate-950 p-4 rounded-xl border border-slate-800 mb-4">
+              <div class="flex items-start space-x-2">
+                <span class="w-5 h-5 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
+                <div>
+                  <span class="text-slate-200 font-semibold">Visit Telegram Developer Portal:</span>
+                  <p class="text-slate-400 mt-0.5">
+                    Open <a href="https://my.telegram.org" target="_blank" class="text-sky-400 underline font-semibold">my.telegram.org</a> and sign in with your phone number.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-start space-x-2">
+                <span class="w-5 h-5 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
+                <div>
+                  <span class="text-slate-200 font-semibold">Create App:</span>
+                  <p class="text-slate-400 mt-0.5">Click <b>API Development tools</b>, give your app any title (e.g., "MyAIReply"), and get your <code>api_id</code> and <code>api_hash</code>.</p>
+                </div>
+              </div>
+
+              <div class="flex items-start space-x-2">
+                <span class="w-5 h-5 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
+                <div>
+                  <span class="text-slate-200 font-semibold">Run script:</span>
+                  <p class="text-slate-400 mt-0.5">Execute <code>python3 userbot.py</code>. On the first launch, it will ask for your Telegram login code to generate your session file.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <span class="inline-flex items-center text-xs font-semibold text-emerald-400">
+              <svg class="w-4 h-4 mr-1 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Supported via <code>userbot.py</code>
+            </span>
+          </div>
+        </div>
+
+        <!-- Card B: Official Telegram Bot (BotFather) -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-bold uppercase tracking-wider text-purple-400 bg-purple-950 px-2.5 py-1 rounded-md border border-purple-800">
+                Mode B • BotFather
+              </span>
+              <span class="text-2xl">🤖</span>
+            </div>
+
+            <h3 class="text-base font-bold text-white mb-2">Dedicated Bot (@BotFather)</h3>
+            <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+              Creates a dedicated bot username (e.g., <code>@MyCustomerSupportBot</code>) via the standard Telegram Bot API for 1-on-1 customer service.
+            </p>
+
+            <div class="space-y-3 text-xs bg-slate-950 p-4 rounded-xl border border-slate-800 mb-4">
+              <div class="flex items-start space-x-2">
+                <span class="w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
+                <div>
+                  <span class="text-slate-200 font-semibold">Open @BotFather:</span>
+                  <p class="text-slate-400 mt-0.5">
+                    Search for <a href="https://t.me/BotFather" target="_blank" class="text-purple-400 underline font-semibold">@BotFather</a> on Telegram.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-start space-x-2">
+                <span class="w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
+                <div>
+                  <span class="text-slate-200 font-semibold">Create New Bot:</span>
+                  <p class="text-slate-400 mt-0.5">Send <code>/newbot</code>, choose a display name and username ending in <code>bot</code>.</p>
+                </div>
+              </div>
+
+              <div class="flex items-start space-x-2">
+                <span class="w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
+                <div>
+                  <span class="text-slate-200 font-semibold">Copy Token:</span>
+                  <p class="text-slate-400 mt-0.5">Paste the HTTP API Token into your <code>.env</code> file under <code>TELEGRAM_BOT_TOKEN</code>.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <span class="inline-flex items-center text-xs font-semibold text-purple-400">
+              <svg class="w-4 h-4 mr-1 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Supported via <code>bot.py</code>
+            </span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Card C: Getting AI API Keys -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <h3 class="text-sm font-bold text-white mb-4 flex items-center space-x-2">
+          <span>🧠 Free AI API Keys (Google Gemini & OpenAI)</span>
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-start space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center shrink-0 font-bold">G</div>
+            <div>
+              <div class="font-bold text-white mb-1">Google Gemini (Recommended & Free)</div>
+              <p class="text-slate-400 leading-relaxed mb-2">
+                Google provides generous free tier quotas for Gemini 1.5 Flash. Fast response times and generous rate limits.
+              </p>
+              <a href="https://aistudio.google.com/" target="_blank" class="inline-flex items-center text-sky-400 hover:text-sky-300 font-semibold">
+                Get free Gemini Key from Google AI Studio &rarr;
+              </a>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-start space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-emerald-600/20 text-emerald-400 flex items-center justify-center shrink-0 font-bold">O</div>
+            <div>
+              <div class="font-bold text-white mb-1">OpenAI (GPT-4o & GPT-4o-mini)</div>
+              <p class="text-slate-400 leading-relaxed mb-2">
+                Industry benchmark conversational reasoning. Supports custom system instructions and fast inference.
+              </p>
+              <a href="https://platform.openai.com/api-keys" target="_blank" class="inline-flex items-center text-emerald-400 hover:text-emerald-300 font-semibold">
+                Get OpenAI API Key from OpenAI Platform &rarr;
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- ======================================================== -->
+    <!-- TAB 4: CONFIG BUILDER & CODE EXPLORER -->
+    <!-- ======================================================== -->
+    <div id="tab-code" class="tab-content hidden space-y-6">
+      
+      <!-- Interactive .env Generator -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+              <span>📄 Live .env Configuration Generator</span>
+            </h3>
+            <p class="text-xs text-slate-400">Fill in your values and download or copy the ready-to-run .env file</p>
+          </div>
+          <div class="flex space-x-2">
+            <button onclick="copyEnvText()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition flex items-center space-x-1">
+              <span id="copy-env-label">📋 Copy .env</span>
+            </button>
+            <button onclick="downloadEnvFile()" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold rounded-lg shadow transition flex items-center space-x-1">
+              <span>💾 Download .env</span>
+            </button>
+          </div>
+        </div>
+
+        <pre id="env-preview" class="bg-slate-950 p-4 rounded-xl font-mono text-xs text-emerald-400 border border-slate-800/80 overflow-x-auto leading-relaxed select-all"># BOT MODE: 'userbot' (personal account) or 'bot' (BotFather)
+BOT_MODE=userbot
+
+# Telegram Userbot Credentials (from https://my.telegram.org)
+TELEGRAM_API_ID=12345678
+TELEGRAM_API_HASH=your_telegram_api_hash
+TELEGRAM_PHONE=+1234567890
+
+# Official Bot Token (if BOT_MODE=bot)
+TELEGRAM_BOT_TOKEN=
+
+# AI Provider: 'gemini' or 'openai'
+AI_PROVIDER=gemini
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-1.5-flash
+
+# OpenAI Settings (optional)
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-4o-mini
+
+# Behavior & Cooldowns
+AUTO_REPLY_DELAY=2.0
+REPLY_COOLDOWN_SECONDS=10
+MAX_REPLIES_PER_HOUR=8
+
+# Filters (comma-separated usernames without @)
+WHITELIST_USERS=
+BLACKLIST_USERS=</pre>
+      </div>
+
+      <!-- File Navigator -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+        <div class="bg-slate-950 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span class="text-xs font-mono text-slate-400">Project Files:</span>
+            <button onclick="viewCodeFile('userbot.py')" class="code-tab-btn active px-3 py-1 text-xs font-mono rounded-lg bg-sky-500/20 text-sky-400 border border-sky-500/30">userbot.py</button>
+            <button onclick="viewCodeFile('bot.py')" class="code-tab-btn px-3 py-1 text-xs font-mono rounded-lg text-slate-400 hover:text-slate-200">bot.py</button>
+            <button onclick="viewCodeFile('ai_engine.py')" class="code-tab-btn px-3 py-1 text-xs font-mono rounded-lg text-slate-400 hover:text-slate-200">ai_engine.py</button>
+            <button onclick="viewCodeFile('Dockerfile')" class="code-tab-btn px-3 py-1 text-xs font-mono rounded-lg text-slate-400 hover:text-slate-200">Dockerfile</button>
+          </div>
+          <button onclick="copyCurrentCode()" class="text-xs text-sky-400 hover:text-sky-300 font-mono">
+            Copy File
+          </button>
+        </div>
+
+        <pre id="code-display" class="p-4 text-xs font-mono text-slate-300 bg-slate-950 overflow-x-auto h-96 leading-relaxed"></pre>
+      </div>
+
+    </div>
+
+
+    <!-- ======================================================== -->
+    <!-- TAB 5: DEPLOY 24/7 -->
+    <!-- ======================================================== -->
+    <div id="tab-deploy" class="tab-content hidden space-y-6">
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Deployment 1: Local / VPS -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-3 text-lg font-bold">
+              🖥️
+            </div>
+            <h3 class="text-sm font-bold text-white mb-2">Option 1: Linux VPS or Mac/PC</h3>
+            <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+              Run directly using Python 3 and systemd or screen/tmux for persistent background operation.
+            </p>
+            <pre class="bg-slate-950 p-3 rounded-lg text-[11px] font-mono text-slate-300 border border-slate-800 mb-3 overflow-x-auto">
+git clone &lt;repo-url&gt;
+cd i-want-telegram-private-message-reply
+chmod +x setup.sh
+./setup.sh
+python3 userbot.py</pre>
+          </div>
+          <span class="text-xs text-slate-400">Consumes &lt;50MB RAM</span>
+        </div>
+
+        <!-- Deployment 2: Docker -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-3 text-lg font-bold">
+              🐳
+            </div>
+            <h3 class="text-sm font-bold text-white mb-2">Option 2: Docker Container</h3>
+            <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+              Deploy inside Docker with auto-restart on system boot. Volume mounts preserve your login session.
+            </p>
+            <pre class="bg-slate-950 p-3 rounded-lg text-[11px] font-mono text-slate-300 border border-slate-800 mb-3 overflow-x-auto">
+# Start in detached mode
+docker compose up -d
+
+# Check live logs
+docker compose logs -f</pre>
+          </div>
+          <span class="text-xs text-slate-400">Zero host dependencies</span>
+        </div>
+
+        <!-- Deployment 3: Cloud / Railway / Render -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-3 text-lg font-bold">
+              ☁️
+            </div>
+            <h3 class="text-sm font-bold text-white mb-2">Option 3: Cloud (Railway / Render)</h3>
+            <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+              One-click deploy from your connected GitHub repository. Set environment variables in the cloud dashboard.
+            </p>
+            <pre class="bg-slate-950 p-3 rounded-lg text-[11px] font-mono text-slate-300 border border-slate-800 mb-3 overflow-x-auto">
+# In Railway or Render:
+1. Connect GitHub repo
+2. Add environment variables
+3. Start command:
+   python3 bot.py</pre>
+          </div>
+          <span class="text-xs text-slate-400">24/7 high availability</span>
+        </div>
+
+      </div>
+
+      <!-- Systemd Service Template -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <h3 class="text-sm font-bold text-white mb-2 flex items-center space-x-2">
+          <span>🐧 Ubuntu / Debian systemd Service (Run on Boot)</span>
+        </h3>
+        <p class="text-xs text-slate-400 mb-4">
+          To ensure your auto-reply userbot restarts automatically if your server reboots, create a systemd service file at <code>/etc/systemd/system/tg-ai-reply.service</code>:
+        </p>
+
+        <pre class="bg-slate-950 p-4 rounded-xl font-mono text-xs text-slate-300 border border-slate-800 overflow-x-auto">[Unit]
+Description=Telegram Private Message AI Auto-Reply Userbot
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/i-want-telegram-private-message-reply
+ExecStart=/root/i-want-telegram-private-message-reply/.venv/bin/python3 userbot.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target</pre>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-900/60 border-t border-slate-800/80 py-4 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0">
+      <span>Telegram Private Message AI Auto-Reply &copy; 2026. Built with Google Gemini & Telethon.</span>
+      <span class="font-mono text-slate-400">Strict 1-on-1 Private DMs Only</span>
+    </div>
+  </footer>
+
+
+  <!-- ======================================================== -->
+  <!-- CLIENT JAVASCRIPT LOGIC -->
+  <!-- ======================================================== -->
+  <script>
+    // State management
+    const state = {
+      activeTab: 'simulator',
+      activePersona: 'executive',
+      typingDelay: 2.0,
+      cooldown: 10,
+      maxHourlyReplies: 8,
+      replyCount: 0,
+      memory: [],
+      apiKey: localStorage.getItem('sim_gemini_api_key') || '',
+      systemPrompt: `You are a friendly, intelligent, and highly professional personal AI assistant. You are automatically replying to private 1-on-1 messages on behalf of the user because they are currently away or busy.
+Guidelines:
+1. Be polite, concise, and helpful.
+2. If they ask a general question, answer it clearly.
+3. If they ask for personal scheduling, urgent decisions, or private info, let them know you have noted their message and the user will get back to them personally soon.
+4. Keep replies natural and conversational, fitting the Telegram messaging style. Do not write overly long essays unless asked.
+5. Never reveal sensitive credentials, API keys, or private system details.`
+    };
+
+    const personaTemplates = {
+      executive: {
+        name: 'Executive Assistant',
+        prompt: `You are an executive AI assistant replying to private messages while the user is in meetings or away from their desk.
+- Acknowledge receipt of their message politely.
+- If it's a general question, provide a brief helpful answer.
+- For meeting requests or approvals, inform them you have recorded their request and the user will personally respond once available.`
+      },
+      freelance: {
+        name: 'Freelancer / Services',
+        prompt: `You are an AI assistant for a freelance specialist and consultant.
+- Greet prospective clients warmly.
+- Inform them that standard project consultations start at $120/hr, with turnkey delivery.
+- Ask for brief details regarding their project scope and timeline so the user can review it.`
+      },
+      support: {
+        name: 'Customer Support',
+        prompt: `You are a dedicated Customer Support AI agent.
+- Welcome the customer with empathy and speed.
+- Guide them through common troubleshooting steps or request their order / account ID.
+- Assure them their request is queued with high priority.`
+      },
+      away: {
+        name: 'Out of Office',
+        prompt: `You are an automated Out-of-Office responder.
+- Inform the sender that the user is currently away on vacation / leave until next Monday.
+- State that their message has been logged and will be answered upon return. For genuine emergencies, ask them to reply with "URGENT".`
+      }
+    };
+
+    // Tab switcher
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-sky-500', 'text-white', 'shadow-sm');
+        btn.classList.add('text-slate-400');
+      });
+
+      const targetTab = document.getElementById('tab-' + tabId);
+      const targetBtn = document.getElementById('tab-btn-' + tabId);
+      if (targetTab) targetTab.classList.remove('hidden');
+      if (targetBtn) {
+        targetBtn.classList.add('active', 'bg-sky-500', 'text-white', 'shadow-sm');
+        targetBtn.classList.remove('text-slate-400');
+      }
+      state.activeTab = tabId;
+
+      if (tabId === 'code') {
+        viewCodeFile('userbot.py');
+      }
+    }
+
+    // Persona selection
+    function setPersona(key) {
+      if (!personaTemplates[key]) return;
+      state.activePersona = key;
+      state.systemPrompt = personaTemplates[key].prompt;
+      
+      document.getElementById('setting-system-prompt').value = state.systemPrompt;
+      document.getElementById('diag-persona').textContent = personaTemplates[key].name;
+      document.getElementById('chat-header-name').textContent = personaTemplates[key].name;
+
+      document.querySelectorAll('.persona-btn').forEach(btn => {
+        btn.classList.remove('active', 'border-sky-500', 'bg-sky-500/10', 'text-sky-300');
+        btn.classList.add('border-slate-800', 'bg-slate-950', 'text-slate-300');
+      });
+      event.currentTarget.classList.add('active', 'border-sky-500', 'bg-sky-500/10', 'text-sky-300');
+      event.currentTarget.classList.remove('border-slate-800', 'bg-slate-950', 'text-slate-300');
+    }
+
+    function updateDelayVal(val) {
+      state.typingDelay = parseFloat(val);
+      document.getElementById('label-delay').textContent = parseFloat(val).toFixed(1) + 's';
+      document.getElementById('diag-delay').textContent = parseFloat(val).toFixed(1) + ' seconds';
+    }
+
+    function updateCooldownVal(val) {
+      state.cooldown = parseInt(val);
+      document.getElementById('label-cooldown').textContent = val + 's';
+    }
+
+    function updateMaxRepliesVal(val) {
+      state.maxHourlyReplies = parseInt(val);
+      document.getElementById('label-max-replies').textContent = val + '/hr';
+      document.getElementById('diag-rate-limit').textContent = `${state.replyCount} / ${val} replies`;
+    }
+
+    function savePersonaSettings() {
+      state.systemPrompt = document.getElementById('setting-system-prompt').value;
+      alert('✅ Persona and safety settings applied to bot configuration!');
+      switchTab('simulator');
+    }
+
+    function saveSimApiKey() {
+      const val = document.getElementById('sim-gemini-key').value.trim();
+      state.apiKey = val;
+      localStorage.setItem('sim_gemini_api_key', val);
+      if (val) {
+        alert('🔑 Gemini API Key saved locally in browser! Live model generation active.');
+      } else {
+        alert('🔄 Switched back to realistic built-in simulation engine.');
+      }
+    }
+
+    // Chat mechanics
+    function clearChat() {
+      const container = document.getElementById('chat-messages');
+      container.innerHTML = `
+        <div class="flex justify-center my-2">
+          <span class="bg-[#182533]/80 text-slate-400 text-[11px] px-3 py-0.5 rounded-full shadow-sm">
+            Chat cleared
+          </span>
+        </div>
+      `;
+      state.memory = [];
+      state.replyCount = 0;
+      document.getElementById('diag-memory-count').textContent = '0 messages stored';
+      document.getElementById('diag-rate-limit').textContent = `0 / ${state.maxHourlyReplies} replies`;
+    }
+
+    function sendQuickPrompt(text) {
+      document.getElementById('user-input').value = text;
+      sendMessage();
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('user-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      input.value = '';
+      input.focus();
+
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      // Append user message bubble (Right side)
+      appendMessageBubble('user', text, timeStr);
+
+      // Add to memory
+      state.memory.push({ role: 'user', text });
+      document.getElementById('diag-memory-count').textContent = `${state.memory.length} messages stored`;
+
+      // Show typing indicator
+      const typingInd = document.getElementById('typing-indicator');
+      typingInd.classList.remove('hidden');
+
+      const messagesDiv = document.getElementById('chat-messages');
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+      // Rate limit check
+      if (state.replyCount >= state.maxHourlyReplies) {
+        setTimeout(() => {
+          typingInd.classList.add('hidden');
+          appendMessageBubble('system', `⚠️ Rate Limiter Triggered: Maximum hourly reply threshold reached (${state.maxHourlyReplies}/hr). Message skipped.`, timeStr);
+        }, 800);
+        return;
+      }
+
+      // Simulate typing delay
+      const delayMs = Math.max(800, state.typingDelay * 1000);
+      
+      try {
+        let replyText = '';
+
+        if (state.apiKey) {
+          // Direct call to Gemini 1.5 Flash
+          replyText = await callRealGemini(text);
+        } else {
+          // Built-in smart response generator
+          replyText = await generateSimulatedReply(text);
+        }
+
+        setTimeout(() => {
+          typingInd.classList.add('hidden');
+          state.replyCount++;
+          document.getElementById('diag-rate-limit').textContent = `${state.replyCount} / ${state.maxHourlyReplies} replies`;
+
+          appendMessageBubble('bot', replyText, new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+          state.memory.push({ role: 'model', text: replyText });
+          document.getElementById('diag-memory-count').textContent = `${state.memory.length} messages stored`;
+        }, delayMs);
+
+      } catch (err) {
+        setTimeout(() => {
+          typingInd.classList.add('hidden');
+          appendMessageBubble('bot', "Thank you for reaching out! I have received your private message and will follow up shortly.", timeStr);
+        }, delayMs);
+      }
+    }
+
+    function appendMessageBubble(sender, text, timeStr) {
+      const container = document.getElementById('chat-messages');
+      const wrap = document.createElement('div');
+
+      if (sender === 'user') {
+        wrap.className = 'flex flex-col items-end max-w-[85%] ml-auto';
+        wrap.innerHTML = `
+          <div class="bg-[#2b5278] text-white px-3.5 py-2 rounded-2xl rounded-tr-sm shadow-md">
+            <p class="leading-relaxed whitespace-pre-wrap">${escapeHtml(text)}</p>
+            <div class="flex items-center justify-end space-x-1 mt-1 text-[10px] text-sky-200/70">
+              <span>${timeStr}</span>
+              <span class="text-sky-300">✓✓</span>
+            </div>
+          </div>
+        `;
+      } else if (sender === 'bot') {
+        wrap.className = 'flex flex-col items-start max-w-[85%]';
+        wrap.innerHTML = `
+          <div class="bg-[#182533] text-slate-200 px-3.5 py-2 rounded-2xl rounded-tl-sm shadow-md border border-slate-800/40">
+            <p class="leading-relaxed whitespace-pre-wrap">${escapeHtml(text)}</p>
+            <div class="flex items-center justify-end space-x-1 mt-1 text-[10px] text-slate-400">
+              <span>${timeStr}</span>
+            </div>
+          </div>
+        `;
+      } else {
+        wrap.className = 'flex justify-center my-1';
+        wrap.innerHTML = `
+          <span class="bg-rose-950/60 border border-rose-800/40 text-rose-300 text-[11px] px-3 py-1 rounded-full text-center">
+            ${escapeHtml(text)}
+          </span>
+        `;
+      }
+
+      container.appendChild(wrap);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    async function callRealGemini(userText) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${state.apiKey}`;
+      const contents = state.memory.map(m => ({
+        role: m.role === 'user' ? 'user' : 'model',
+        parts: [{ text: m.text }]
+      }));
+      contents.push({ role: 'user', parts: [{ text: userText }] });
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: state.systemPrompt }] },
+          contents: contents
+        })
+      });
+      const data = await res.json();
+      return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Thank you for your message!";
+    }
+
+    function generateSimulatedReply(msg) {
+      const lower = msg.toLowerCase();
+      const p = state.activePersona;
+
+      if (p === 'freelance') {
+        if (lower.includes('rate') || lower.includes('price') || lower.includes('cost')) {
+          return "Hello! My standard consulting rate is $120/hr, or a fixed quote based on project deliverables. Could you share a quick outline of what you need built?";
+        }
+        if (lower.includes('project') || lower.includes('freelance') || lower.includes('hire')) {
+          return "Thanks for reaching out regarding a project! I'm currently reviewing availability for this month. Could you share your tech stack and target deadline?";
+        }
+        return "Hi there! I am currently focused on project work, but I've received your note. Feel free to send over project specs or request a calendar link!";
+      }
+
+      if (p === 'support') {
+        if (lower.includes('urgent') || lower.includes('error') || lower.includes('500') || lower.includes('bug')) {
+          return "🚨 We have flagged this as an urgent technical inquiry. Our engineering on-call has been alerted. Please provide any error logs or screenshots if available.";
+        }
+        return "Hello! Thank you for contacting customer support. We are here to help. Could you please provide your account email or reference ID so we can inspect your case?";
+      }
+
+      if (p === 'away') {
+        return "👋 Hello! I am currently away from Telegram with limited connectivity. I will return next Monday. If this is time-critical, please send an email to my primary inbox.";
+      }
+
+      // Default: Executive
+      if (lower.includes('call') || lower.includes('meeting') || lower.includes('schedule')) {
+        return "Thank you for the invite. I'm currently in working sessions today. I've noted your availability and will follow up with calendar options once I'm at my desk.";
+      }
+      if (lower.includes('urgent') || lower.includes('asap')) {
+        return "I have flagged your message as priority. I will review this as soon as I wrap up my current meeting.";
+      }
+      return "Hi there! Thanks for your private message. I'm away from my keyboard at the moment, but I have noted this and will reply personally shortly.";
+    }
+
+    function escapeHtml(string) {
+      const div = document.createElement('div');
+      div.innerText = string;
+      return div.innerHTML;
+    }
+
+    function copyEnvText() {
+      const text = document.getElementById('env-preview').innerText;
+      navigator.clipboard.writeText(text);
+      const label = document.getElementById('copy-env-label');
+      label.textContent = "✅ Copied!";
+      setTimeout(() => label.textContent = "📋 Copy .env", 2000);
+    }
+
+    function downloadEnvFile() {
+      const text = document.getElementById('env-preview').innerText;
+      const blob = new Blob([text], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = '.env';
+      a.click();
+    }
+
+    const codeFiles = {
+      'userbot.py': `# Telethon Userbot for Personal Telegram Account Private DMs
+from telethon import TelegramClient, events
+import asyncio, logging
+from config import Config
+from ai_engine import AIEngine
+
+ai = AIEngine(provider=Config.AI_PROVIDER, system_instruction=Config.SYSTEM_PROMPT)
+client = TelegramClient(Config.TELETHON_SESSION_NAME, Config.TELEGRAM_API_ID, Config.TELEGRAM_API_HASH)
+
+@client.on(events.NewMessage(incoming=True))
+async def handle_dm(event):
+    if not event.is_private or event.out:
+        return
+    sender = await event.get_sender()
+    if sender.bot:
+        return
+    
+    async with client.action(event.chat_id, 'typing'):
+        await asyncio.sleep(Config.AUTO_REPLY_DELAY)
+        reply = await ai.generate_reply(sender.id, event.raw_text, sender.first_name)
+    
+    await event.reply(reply)
+
+client.start()
+client.run_until_disconnected()`,
+      'bot.py': `# Official BotFather Bot via python-telegram-bot
+from telegram import Update
+from telegram.constants import ChatAction
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
+from config import Config
+from ai_engine import AIEngine
+
+ai = AIEngine(provider=Config.AI_PROVIDER, system_instruction=Config.SYSTEM_PROMPT)
+
+async def handle_private(update: Update, context):
+    if update.effective_chat.type != "private":
+        return
+    await context.bot.send_chat_action(update.effective_chat.id, ChatAction.TYPING)
+    reply = await ai.generate_reply(update.effective_user.id, update.message.text, update.effective_user.first_name)
+    await update.message.reply_text(reply)
+
+app = Application.builder().token(Config.TELEGRAM_BOT_TOKEN).build()
+app.add_handler(MessageHandler(filters.ChatType.PRIVATE & filters.TEXT & (~filters.COMMAND), handle_private))
+app.run_polling()`,
+      'ai_engine.py': `# Unified AI Engine supporting Gemini & OpenAI with per-user memory
+class AIEngine:
+    def __init__(self, provider="gemini", system_instruction=""):
+        self.provider = provider
+        self.system_instruction = system_instruction
+        self.memory = ConversationMemory()
+    
+    async def generate_reply(self, user_id, text, sender_name="User"):
+        # Retrieves per-user memory and queries AI provider
+        ...`,
+      'Dockerfile': `FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+CMD ["python", "userbot.py"]`
+    };
+
+    let currentFile = 'userbot.py';
+
+    function viewCodeFile(filename) {
+      currentFile = filename;
+      document.querySelectorAll('.code-tab-btn').forEach(btn => {
+        if (btn.textContent === filename) {
+          btn.className = 'code-tab-btn active px-3 py-1 text-xs font-mono rounded-lg bg-sky-500/20 text-sky-400 border border-sky-500/30';
+        } else {
+          btn.className = 'code-tab-btn px-3 py-1 text-xs font-mono rounded-lg text-slate-400 hover:text-slate-200';
+        }
+      });
+      document.getElementById('code-display').textContent = codeFiles[filename] || '';
+    }
+
+    function copyCurrentCode() {
+      navigator.clipboard.writeText(codeFiles[currentFile] || '');
+      alert(`Copied ${currentFile} to clipboard!`);
+    }
+
+    // Init on load
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('setting-system-prompt').value = state.systemPrompt;
+      if (state.apiKey) {
+        document.getElementById('sim-gemini-key').value = state.apiKey;
+      }
+    });
+  </script>
+</body>
+</html>

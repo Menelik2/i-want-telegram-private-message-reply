@@ -4,10 +4,11 @@ Reads from environment variables or .env file.
 """
 
 import os
-from dotenv import load_dotenv
-
-# Load .env if present
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 class Config:
     # Mode: 'userbot' (personal account MTProto) or 'bot' (BotFather Bot API)

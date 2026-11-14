@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  telegram-ai-reply:
+    build: .
+    container_name: telegram_ai_reply
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      # Preserve user session files so you don't have to re-login on restart
+      - ./data:/app/data
+    stdin_open: true
+    tty: true

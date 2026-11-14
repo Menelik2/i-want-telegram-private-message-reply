@@ -14,15 +14,17 @@ An intelligent, production-ready AI auto-responder for **Telegram 1-on-1 private
 
 * **Strict Private Message Isolation**: Operates exclusively in 1-on-1 private chats. Never posts in groups or public channels.
 * **Two Operating Modes**:
-  1. **Personal Account Auto-Reply (`userbot.py`)**: Runs on your personal Telegram account via MTProto (`Telethon`). Answers contacts or strangers when you are away or busy.
+  1. **Personal Account Auto-Reply (`userbot.py`)**: Runs on your personal Telegram account via MTProto (`Telethon`). Answers contacts or strangers when you are away or busy. Supports in-Telegram commands (`.status`, `.away [reason]`, `.back`, `.help`).
   2. **Official Telegram Bot (`bot.py`)**: Runs as a standard `@BotFather` bot via Telegram Bot API (`python-telegram-bot`) for customer support or lead capture.
 * **Multi-Provider AI Engine**: Native support for **Google Gemini** (`gemini-1.5-flash`, `gemini-1.5-pro`) and **OpenAI** (`gpt-4o`, `gpt-4o-mini`).
-* **Conversational Memory**: Remembers previous messages in the chat session so replies stay context-aware.
+* **Conversational Memory**: Remembers previous messages in the chat session with automatic TTL expiration so replies stay context-aware.
 * **Human-Like Behavior**: Simulates real Telegram typing indicator with custom delays before sending.
-* **Loop & Spam Protection**:
+* **Loop & Spam Protection (`filters.py`)**:
   - Automatically ignores other bots to avoid infinite loop cascades.
+  - Automatically protects Telegram official service login codes (`ID 777000`).
   - Per-user cooldown and hourly rate limiters.
   - Whitelist and blacklist filtering.
+* **22 Automated Logic Verification Tests (`test_suite.py`)**: Validates all safety checks, sanitizers, and edge cases with zero regressions.
 * **Zero-Setup Web Dashboard & Simulator**: Test and preview private message responses right from your browser.
 
 ---

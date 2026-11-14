@@ -16,6 +16,18 @@
       "created_at": "2026-11-14T13:30:46.509Z",
       "sender": "ios",
       "is_cancelled": false
+    },
+    {
+      "id": "72c5d360-172f-463a-b999-b609d9f5592f",
+      "role": "user",
+      "content": "Yes",
+      "status": "pending",
+      "model": "gemini-3.8-flash-high",
+      "client_type": "gemini-bridge",
+      "parent_message_id": null,
+      "created_at": "2026-11-14T13:32:09.356Z",
+      "sender": "ios",
+      "is_cancelled": false
     }
   ]
 }

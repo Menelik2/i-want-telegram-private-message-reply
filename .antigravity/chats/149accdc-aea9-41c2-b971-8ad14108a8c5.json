@@ -3,7 +3,7 @@
   "name": "I want telegram private message reply",
   "createdAt": "2026-11-14T13:29:06.675Z",
   "filename": "149accdc-aea9-41c2-b971-8ad14108a8c5.json",
-  "geminiStarted": false,
+  "geminiStarted": true,
   "messages": [
     {
       "id": "d442493e-1de6-408c-9e9d-6f2be7006973",
@@ -27,6 +27,18 @@
       "parent_message_id": null,
       "created_at": "2026-11-14T13:32:09.356Z",
       "sender": "ios",
+      "is_cancelled": false
+    },
+    {
+      "id": "cce8dde9-5a37-4b8c-9428-b21098cb8364",
+      "role": "agent",
+      "content": "Your **Telegram Private Message AI Auto-Reply Bot** is ready!\n\nYou can test and configure the bot directly via the live interactive preview:\n👉 **[Open Live Web Dashboard & DM Simulator](https://antigravity.luch.dev/site/a515bea3-ac5b-4e6a-b886-d94eec6dff67/13d4565b9f1ed6e36e335da4/)**\n\n---\n\n### 📦 What Has Been Built\n\n1. **Interactive Telegram DM Simulator & Web Dashboard** ([index.html](https://github.com/Menelik2/i-want-telegram-private-message-reply/blob/root/index.html))\n   - **Live 1-on-1 Chat Mockup**: Test incoming DMs in real time with typing indicators, response delays, and per-user memory tracking.\n   - **Persona Studio**: Switch between *Executive Assistant*, *Freelancer / Consulting*, *Customer Support*, and *Out of Office*.\n   - **Credentials Wizard**: Step-by-step guides for obtaining Telegram API keys and free Gemini API tokens.\n   - **Config Generator**: Real-time `.env` file generator with 1-click copy & download.\n\n2. **Personal Account Auto-Reply Script** ([userbot.py](https://github.com/Menelik2/i-want-telegram-private-message-reply/blob/root/userbot.py))\n   - Built with **Telethon** (MTProto client) to run on your personal Telegram account.\n   - Strictly replies only to **1-on-1 private messages (DMs)** — never posts in group chats or channels.\n   - Automatic anti-loop filters (ignores messages from other bots and yourself).\n   - Human-like typing indicators, cooldowns, and hourly rate limits.\n\n3. **Dedicated BotFather Bot Script** ([bot.py](https://github.com/Menelik2/i-want-telegram-private-message-reply/blob/root/bot.py))\n   - Built with **python-telegram-bot** for official bot tokens (`@BotFather`).\n   - Handles `/start`, `/clear`, `/status`, and private message conversations.\n\n4. **Unified AI Engine with Memory** ([ai_engine.py](https://github.com/Menelik2/i-want-telegram-private-message-reply/blob/root/ai_engine.py))\n   - Supports **Google Gemini** (`gemini-1.5-flash`, `gemini-1.5-pro`) and **OpenAI** (`gpt-4o`, `gpt-4o-mini`).\n   - Rolling conversation context per user with automatic session expiration.\n\n5. **Deployment & Environment Setup**\n   - [config.py](https://github.com/Menelik2/i-want-telegram-private-message-reply/blob/root/config.py) & [.env.example](https://github.com/Menelik2/i-want-telegram-private-message-reply/blob/root/.env.example): Environment configuration.\n   - [requirements.txt](https://github.com/Menelik2/i-want-telegram-private-message-reply/blob/root/requirements.txt): Python dependencies.\n   - [Dockerfile](https://github.com/Menelik2/i-want-telegram-private-message-reply/blob/root/Dockerfile) & [docker-compose.yml](https://github.com/Menelik2/i-want-telegram-private-message-reply/blob/root/docker-compose.yml): 24/7 background container.\n   - [setup.sh](https://github.com/Menelik2/i-want-telegram-private-message-reply/blob/root/setup.sh): Automated one-command setup script.\n   - [README.md](https://github.com/Menelik2/i-want-telegram-private-message-reply/blob/root/README.md): Full documentation and deployment guide.\n\n---\n\n### 🚀 Quick Start\n\nTo launch on your machine or VPS:\n\n```bash\n# 1. Install dependencies & create .env\n./setup.sh\n\n# 2. Run Personal Account DM Auto-Reply\nsource .venv/bin/activate\npython3 userbot.py\n\n# Or run official BotFather Bot\npython3 bot.py\n```\n\nAll changes have been saved and synced to your repository.",
+      "status": "completed",
+      "model": "gemini-3.8-flash-high",
+      "client_type": "gemini-bridge",
+      "parent_message_id": "72c5d360-172f-463a-b999-b609d9f5592f",
+      "created_at": "2026-11-14T13:39:35.212Z",
+      "sender": "macOS",
       "is_cancelled": false
     }
   ]
